@@ -1,5 +1,7 @@
 Revision history for Web::ComposableRequest::Role::Authen::HTTP
 
+          - Compiles
+
 0.1.1     2015-09-08 00:59:55
           - Added project files to master branch
 

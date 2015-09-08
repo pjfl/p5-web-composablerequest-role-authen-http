@@ -2,13 +2,96 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
 
-use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
-use Moo;
+use Authen::HTTP::Signature::Parser;
+use Convert::SSH2;
+use Digest                            qw( );
+use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED
+                                          HTTP_UNAUTHORIZED );
+use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
+use Web::ComposableRequest::Exception::Authen::HTTP;
+use Web::ComposableRequest::Util      qw( add_config_role is_member throw );
+use Unexpected::Functions             qw( ChecksumFailure MissingHeader
+                                          MissingKey SigParserFailure
+                                          SigVerifyFailure Unspecified );
+use Moo::Role;
 
-extends q(Class::Usul::Programs);
+requires qw( _config _content _env );
+
+add_config_role __PACKAGE__.'::Config';
+
+my $public_key_cache = {};
+
+# Private functions
+my $_class2appdir = sub {
+   (my $v = $_[ 0 ] // NUL) =~ s{ :: }{-}gmx; return lc $v;
+};
+
+my $_read_public_key = sub {
+   my ($config, $key_id) = @_;
+
+   my $key      = $public_key_cache->{ $key_id }; $key and return $key;
+   my $prefix   = $_class2appdir->( $config->appclass );
+   my $key_file = $config->ssh_dir->catfile( "${prefix}_${key_id}.pub" );
+
+   try   { $key = Convert::SSH2->new( $key_file->all )->format_output }
+   catch { throw MissingKey, error => $_, rv => HTTP_UNAUTHORIZED };
+
+   return $public_key_cache->{ $key_id } = $key;
+};
+
+# Public mehhods
+sub authenticate {
+   my $self = shift; my $sig;
+
+   try   { $sig = Authen::HTTP::Signature::Parser->new( $self )->parse() }
+   catch { throw SigParserFailure, error => $_, rv => HTTP_EXPECTATION_FAILED };
+
+   $sig->key_id
+      or throw Unspecified, [ 'key id' ], rv => HTTP_EXPECTATION_FAILED;
+
+   if (is_member 'content-sha512', $sig->headers) {
+      my $digest = Digest->new( 'SHA-512' ); $digest->add( $self->_content );
+
+      $self->header( 'content-sha512' ) eq $digest->hexdigest
+         or throw ChecksumFailure, [ $sig->key_id ], rv => HTTP_UNAUTHORIZED;
+   }
+   elsif ($sig->headers->[ 0 ] ne 'request-line') {
+      throw MissingHeader, [ $sig->key_id ], rv => HTTP_EXPECTATION_FAILED;
+   }
+
+   $sig->key( $_read_public_key->( $self->_config, $sig->key_id ) );
+
+   $sig->verify
+      or throw SigVerifyFailure, [ $sig->key_id ], rv => HTTP_UNAUTHORIZED;
+
+   return; # Authentication was successful
+}
+
+sub header {
+   my ($self, $name) = @_; $name =~ s{ [\-] }{_}gmx; $name = uc $name;
+
+   exists $self->_env->{ "HTTP_${name}" }
+      and return $self->_env->{ "HTTP_${name}" };
+
+   return $self->_env->{ $name };
+}
+
+package Web::ComposableRequest::Role::Authen::HTTP::Config;
+
+use namespace::autoclean;
+
+use File::DataClass::Types     qw( Directory );
+use File::DataClass::Constants qw( TRUE );
+use File::HomeDir;
+use Moo::Role;
+
+has 'my_home' => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder    => sub { File::HomeDir->my_home };
+
+has 'ssh_dir' => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder    => sub { $_[ 0 ]->my_home->catdir( '.ssh' ) };
 
 1;
 
@@ -38,6 +121,10 @@ Defines the following attributes;
 =back
 
 =head1 Subroutines/Methods
+
+=head2 C<authenticate>
+
+=head2 C<header>
 
 =head1 Diagnostics
 
