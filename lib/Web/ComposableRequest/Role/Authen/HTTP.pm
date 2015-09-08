@@ -2,7 +2,7 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 use Authen::HTTP::Signature::Parser;
 use Convert::SSH2;
@@ -103,14 +103,18 @@ __END__
 
 =head1 Name
 
-Web::ComposableRequest::Role::Authen::HTTP - One-line description of the modules purpose
+Web::ComposableRequest::Role::Authen::HTTP - Authenticates HTTP request headers
 
 =head1 Synopsis
 
-   use Web::ComposableRequest::Role::Authen::HTTP;
-   # Brief but working code examples
+   use Moo;
+
+   extends 'Web::ComposableRequest::Base';
+   with    'Web::ComposableRequest::Role::Authen::HTTP';
 
 =head1 Description
+
+Authenticates HTTP request headers
 
 =head1 Configuration and Environment
 
@@ -118,21 +122,45 @@ Defines the following attributes;
 
 =over 3
 
+=item C<my_home>
+
+The users home directory as determined by L<File::HomeDir>
+
+=item C<ssh_dir>
+
+The directory containing SSH public keys. Defaults to F<~/.ssh>
+
 =back
 
 =head1 Subroutines/Methods
 
 =head2 C<authenticate>
 
+Authenticates the request headers
+
 =head2 C<header>
 
+Retrieves request header values
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
-=item L<Class::Usul>
+=item L<Authen::HTTP::Signature>
+
+=item L<Convert::SSH2>
+
+=item L<HTTP::Message>
+
+=item L<Moo>
+
+=item L<Unexpected>
+
+=item L<Web::ComposableRequest>
 
 =back
 
