@@ -1,29 +1,52 @@
 # Name
 
-Web::ComposableRequest::Role::Authen::HTTP - One-line description of the modules purpose
+Web::ComposableRequest::Role::Authen::HTTP - Authenticates HTTP request headers
 
 # Synopsis
 
-    use Web::ComposableRequest::Role::Authen::HTTP;
-    # Brief but working code examples
+    use Moo;
+
+    extends 'Web::ComposableRequest::Base';
+    with    'Web::ComposableRequest::Role::Authen::HTTP';
 
 # Description
+
+Authenticates HTTP request headers
 
 # Configuration and Environment
 
 Defines the following attributes;
 
+- `my_home`
+
+    The users home directory as determined by [File::HomeDir](https://metacpan.org/pod/File::HomeDir)
+
+- `ssh_dir`
+
+    The directory containing SSH public keys. Defaults to `~/.ssh`
+
 # Subroutines/Methods
 
 ## `authenticate`
 
+Authenticates the request headers
+
 ## `header`
+
+Retrieves request header values
 
 # Diagnostics
 
+None
+
 # Dependencies
 
-- [Class::Usul](https://metacpan.org/pod/Class::Usul)
+- [Authen::HTTP::Signature](https://metacpan.org/pod/Authen::HTTP::Signature)
+- [Convert::SSH2](https://metacpan.org/pod/Convert::SSH2)
+- [HTTP::Message](https://metacpan.org/pod/HTTP::Message)
+- [Moo](https://metacpan.org/pod/Moo)
+- [Unexpected](https://metacpan.org/pod/Unexpected)
+- [Web::ComposableRequest](https://metacpan.org/pod/Web::ComposableRequest)
 
 # Incompatibilities
 
