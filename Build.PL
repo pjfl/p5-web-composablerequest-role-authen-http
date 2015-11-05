@@ -15,12 +15,13 @@ my $prereqs  = {
     'version' => '0.88'
   },
   'requires' => {
-    'Authen::HTTP::Signature' => '0.02',
+    'Authen::HTTP::Signature' => '0.03',
     'Convert::SSH2' => '0.01',
     'File::DataClass' => 'v0.66.0',
     'File::HomeDir' => '1.00',
     'HTTP::Message' => '6.06',
     'Moo' => '2.000001',
+    'Try::Tiny' => '0.22',
     'Unexpected' => 'v0.40.0',
     'Web::ComposableRequest' => 'v0.4.0',
     'namespace::autoclean' => '0.26',

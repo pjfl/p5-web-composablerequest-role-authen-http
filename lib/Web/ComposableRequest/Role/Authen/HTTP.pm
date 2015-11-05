@@ -2,13 +2,14 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 
 use Authen::HTTP::Signature::Parser;
 use Convert::SSH2;
 use Digest                            qw( );
 use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED
                                           HTTP_UNAUTHORIZED );
+use Try::Tiny;
 use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
 use Web::ComposableRequest::Exception::Authen::HTTP;
 use Web::ComposableRequest::Util      qw( add_config_role is_member throw );
@@ -42,7 +43,7 @@ my $_read_public_key = sub {
 };
 
 # Public mehhods
-sub authenticate {
+sub authenticate_headers {
    my $self = shift; my $sig;
 
    try   { $sig = Authen::HTTP::Signature::Parser->new( $self )->parse() }
@@ -82,16 +83,18 @@ package Web::ComposableRequest::Role::Authen::HTTP::Config;
 
 use namespace::autoclean;
 
-use File::DataClass::Types     qw( Directory );
+use File::DataClass::Types     qw( Directory NonEmptySimpleStr );
 use File::DataClass::Constants qw( TRUE );
 use File::HomeDir;
 use Moo::Role;
 
-has 'my_home' => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder    => sub { File::HomeDir->my_home };
+has 'appclass' => is => 'lazy', isa => NonEmptySimpleStr, required => TRUE;
 
-has 'ssh_dir' => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder    => sub { $_[ 0 ]->my_home->catdir( '.ssh' ) };
+has 'my_home'  => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder     => sub { File::HomeDir->my_home };
+
+has 'ssh_dir'  => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder     => sub { $_[ 0 ]->my_home->catdir( '.ssh' ) };
 
 1;
 
@@ -118,9 +121,14 @@ Authenticates HTTP request headers
 
 =head1 Configuration and Environment
 
-Defines the following attributes;
+Defines the following configuration attributes;
 
 =over 3
+
+=item C<appclass>
+
+Required non empty simple string which is used to create a prefix for the
+public key file
 
 =item C<my_home>
 
@@ -134,13 +142,15 @@ The directory containing SSH public keys. Defaults to F<~/.ssh>
 
 =head1 Subroutines/Methods
 
-=head2 C<authenticate>
+=head2 C<authenticate_headers>
 
 Authenticates the request headers
 
 =head2 C<header>
 
-Retrieves request header values
+Retrieves request header values. Try prefixing the supplied name with
+C<HTTP_>. If that value does not exists just trys the name. Attribute name
+is uppercased either way
 
 =head1 Diagnostics
 

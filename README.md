@@ -15,7 +15,12 @@ Authenticates HTTP request headers
 
 # Configuration and Environment
 
-Defines the following attributes;
+Defines the following configuration attributes;
+
+- `appclass`
+
+    Required non empty simple string which is used to create a prefix for the
+    public key file
 
 - `my_home`
 
@@ -27,13 +32,15 @@ Defines the following attributes;
 
 # Subroutines/Methods
 
-## `authenticate`
+## `authenticate_headers`
 
 Authenticates the request headers
 
 ## `header`
 
-Retrieves request header values
+Retrieves request header values. Try prefixing the supplied name with
+`HTTP_`. If that value does not exists just trys the name. Attribute name
+is uppercased either way
 
 # Diagnostics
 
