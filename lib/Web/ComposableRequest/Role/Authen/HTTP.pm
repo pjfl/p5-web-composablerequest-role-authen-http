@@ -2,13 +2,12 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
 
 use Authen::HTTP::Signature::Parser;
 use Convert::SSH2;
 use Digest                            qw( );
-use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED
-                                          HTTP_UNAUTHORIZED );
+use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED );
 use Try::Tiny;
 use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
 use Web::ComposableRequest::Exception::Authen::HTTP;
@@ -37,7 +36,7 @@ my $_read_public_key = sub {
    my $key_file = $config->ssh_dir->catfile( "${prefix}_${key_id}.pub" );
 
    try   { $key = Convert::SSH2->new( $key_file->all )->format_output }
-   catch { throw MissingKey, error => $_, rv => HTTP_UNAUTHORIZED };
+   catch { throw MissingKey, error => $_ };
 
    return $public_key_cache->{ $key_id } = $key;
 };
@@ -47,7 +46,7 @@ sub authenticate_headers {
    my $self = shift; my $sig;
 
    try   { $sig = Authen::HTTP::Signature::Parser->new( $self )->parse() }
-   catch { throw SigParserFailure, error => $_, rv => HTTP_EXPECTATION_FAILED };
+   catch { throw SigParserFailure, error => $_ };
 
    $sig->key_id
       or throw Unspecified, [ 'key id' ], rv => HTTP_EXPECTATION_FAILED;
@@ -56,16 +55,15 @@ sub authenticate_headers {
       my $digest = Digest->new( 'SHA-512' ); $digest->add( $self->_content );
 
       $self->header( 'content-sha512' ) eq $digest->hexdigest
-         or throw ChecksumFailure, [ $sig->key_id ], rv => HTTP_UNAUTHORIZED;
+         or throw ChecksumFailure, [ $sig->key_id ];
    }
    elsif ($sig->headers->[ 0 ] ne 'request-line') {
-      throw MissingHeader, [ $sig->key_id ], rv => HTTP_EXPECTATION_FAILED;
+      throw MissingHeader, [ $sig->key_id ];
    }
 
    $sig->key( $_read_public_key->( $self->_config, $sig->key_id ) );
 
-   $sig->verify
-      or throw SigVerifyFailure, [ $sig->key_id ], rv => HTTP_UNAUTHORIZED;
+   $sig->verify or throw SigVerifyFailure, [ $sig->key_id ];
 
    return; # Authentication was successful
 }
