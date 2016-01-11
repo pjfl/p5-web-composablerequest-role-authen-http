@@ -1,5 +1,6 @@
 Revision history for Web::ComposableRequest::Role::Authen::HTTP
 
+          - Toolchain update
           - Moved error return values to Exception class
           - Debugged
           - POD updates
