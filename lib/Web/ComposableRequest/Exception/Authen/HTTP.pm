@@ -1,7 +1,5 @@
 package Web::ComposableRequest::Exception::Authen::HTTP;
 
-use namespace::autoclean;
-
 use HTTP::Status          qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED );
 use Unexpected::Functions qw( has_exception );
 use Moo;
@@ -29,6 +27,8 @@ has_exception 'SigParserFailure' => parents => [ 'Authen::HTTP' ],
 has_exception 'SigVerifyFailure' => parents => [ 'Authen::HTTP' ],
    error   => 'Signature [_1] verification failed',
    rv      => HTTP_UNAUTHORIZED;
+
+use namespace::autoclean;
 
 1;
 

@@ -24,7 +24,7 @@ Defines the following configuration attributes;
 
 - `my_home`
 
-    The users home directory as determined by [File::HomeDir](https://metacpan.org/pod/File::HomeDir)
+    The users home directory as determined by [File::HomeDir](https://metacpan.org/pod/File%3A%3AHomeDir)
 
 - `ssh_dir`
 
@@ -48,12 +48,12 @@ None
 
 # Dependencies
 
-- [Authen::HTTP::Signature](https://metacpan.org/pod/Authen::HTTP::Signature)
-- [Convert::SSH2](https://metacpan.org/pod/Convert::SSH2)
-- [HTTP::Message](https://metacpan.org/pod/HTTP::Message)
+- [Authen::HTTP::Signature](https://metacpan.org/pod/Authen%3A%3AHTTP%3A%3ASignature)
+- [Convert::SSH2](https://metacpan.org/pod/Convert%3A%3ASSH2)
+- [HTTP::Message](https://metacpan.org/pod/HTTP%3A%3AMessage)
 - [Moo](https://metacpan.org/pod/Moo)
 - [Unexpected](https://metacpan.org/pod/Unexpected)
-- [Web::ComposableRequest](https://metacpan.org/pod/Web::ComposableRequest)
+- [Web::ComposableRequest](https://metacpan.org/pod/Web%3A%3AComposableRequest)
 
 # Incompatibilities
 
@@ -75,7 +75,7 @@ Peter Flanigan, `<pjfl@cpan.org>`
 
 # License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See [perlartistic](https://metacpan.org/pod/perlartistic)

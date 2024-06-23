@@ -1,5 +1,6 @@
 Revision history for Web::ComposableRequest::Role::Authen::HTTP
 
+          - Header wrapper method updated
           - Toolchain update
           - Moved error return values to Exception class
           - Debugged
