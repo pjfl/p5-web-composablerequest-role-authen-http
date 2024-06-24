@@ -2,7 +2,7 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
 
 use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
 use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED );
@@ -45,7 +45,7 @@ sub authenticate_headers {
       throw MissingHeader, [$sig->key_id];
    }
 
-   $sig->key(_read_public_key($self->_config, $sig->key_id));
+   $sig->key($self->_read_public_key($sig->key_id));
 
    throw SigVerifyFailure, [$sig->key_id] unless $sig->verify;
 
@@ -60,20 +60,15 @@ around 'header' => sub {
    return $orig->($self, $name);
 };
 
-# Private functions
-sub _class2appdir {
-   (my $v = $_[0] // NUL) =~ s{ :: }{-}gmx;
-
-   return lc $v;
-}
-
+# Private methods
 sub _read_public_key {
-   my ($config, $key_id) = @_;
+   my ($self, $key_id) = @_;
 
    my $key = $public_key_cache->{$key_id};
 
    return $key if $key;
 
+   my $config   = $self->_config;
    my $prefix   = _class2appdir($config->appclass);
    my $key_file = $config->ssh_dir->catfile("${prefix}_${key_id}.pub");
 
@@ -81,6 +76,13 @@ sub _read_public_key {
    catch { throw MissingKey, error => $_ };
 
    return $public_key_cache->{$key_id} = $key;
+}
+
+# Private functions
+sub _class2appdir {
+   (my $v = $_[0] // NUL) =~ s{ :: }{-}gmx;
+
+   return lc $v;
 }
 
 package Web::ComposableRequest::Role::Authen::HTTP::Config;
