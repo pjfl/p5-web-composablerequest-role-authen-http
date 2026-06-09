@@ -2,7 +2,7 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
 
 use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
 use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED );
@@ -72,8 +72,10 @@ sub _read_public_key {
    my $prefix   = _class2appdir($config->appclass);
    my $key_file = $config->ssh_dir->catfile("${prefix}_${key_id}.pub");
 
+   throw MissingKey, [$key_file] unless $key_file->exists;
+
    try   { $key = Convert::SSH2->new($key_file->all)->format_output }
-   catch { throw MissingKey, error => $_ };
+   catch { throw $_ };
 
    return $public_key_cache->{$key_id} = $key;
 }

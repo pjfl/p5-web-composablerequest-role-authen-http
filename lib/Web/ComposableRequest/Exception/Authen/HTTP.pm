@@ -1,6 +1,7 @@
 package Web::ComposableRequest::Exception::Authen::HTTP;
 
-use HTTP::Status          qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED );
+use HTTP::Status          qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
+                              HTTP_UNAUTHORIZED );
 use Unexpected::Functions qw( has_exception );
 use Moo;
 
@@ -8,18 +9,18 @@ extends 'Web::ComposableRequest::Exception';
 
 my $parent = 'Web::ComposableRequest::Exception';
 
-has_exception 'Authen::HTTP'     => parents => [ $parent ];
+has_exception 'Authen::HTTP' => parents => [ $parent ];
 
-has_exception 'ChecksumFailure'  => parents => [ 'Authen::HTTP' ],
+has_exception 'ChecksumFailure' => parents => [ 'Authen::HTTP' ],
    error   => 'Signature [_1] checksum failure',
    rv      => HTTP_UNAUTHORIZED;
 
-has_exception 'MissingHeader'    => parents => [ 'Authen::HTTP' ],
+has_exception 'MissingHeader' => parents => [ 'Authen::HTTP' ],
    error   => 'Signature [_1] missing header field',
    rv      => HTTP_EXPECTATION_FAILED;
 
-has_exception 'MissingKey'       => parents => [ 'Authen::HTTP' ],
-   rv      => HTTP_UNAUTHORIZED;
+has_exception 'MissingKey' => parents => [ 'Authen::HTTP' ],
+   error   => 'File [_1] not found', rv => HTTP_NOT_FOUND;
 
 has_exception 'SigParserFailure' => parents => [ 'Authen::HTTP' ],
    rv      => HTTP_EXPECTATION_FAILED;

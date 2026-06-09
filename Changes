@@ -1,5 +1,6 @@
 Revision history for Web::ComposableRequest::Role::Authen::HTTP
 
+          - Improved exception handling
           - Made _read_public key a method
           - Header wrapper method updated
           - Toolchain update
