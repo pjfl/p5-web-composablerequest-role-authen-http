@@ -2,6 +2,8 @@ use t::boilerplate;
 
 use Test::More;
 
+use_ok 'Web::ComposableRequest::Exception::Authen::HTTP';
+
 use_ok 'Web::ComposableRequest::Role::Authen::HTTP';
 
 done_testing;

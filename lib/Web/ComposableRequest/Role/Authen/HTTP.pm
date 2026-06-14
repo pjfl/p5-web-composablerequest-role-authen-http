@@ -2,15 +2,16 @@ package Web::ComposableRequest::Role::Authen::HTTP;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Web::ComposableRequest::Constants qw( EXCEPTION_CLASS NUL );
 use HTTP::Status                      qw( HTTP_EXPECTATION_FAILED );
-use Digest                            qw( );
-use Web::ComposableRequest::Util      qw( add_config_role is_member throw );
 use Unexpected::Functions             qw( ChecksumFailure MissingHeader
                                           MissingKey SigParserFailure
                                           SigVerifyFailure Unspecified );
+use Web::ComposableRequest::Util      qw( add_config_role is_member throw );
+use Scalar::Util                      qw( weaken );
+use Digest                            qw( );
 use Authen::HTTP::Signature::Parser;
 use Convert::SSH2;
 use Try::Tiny;
@@ -26,6 +27,8 @@ my $public_key_cache = {};
 sub authenticate_headers {
    my $self = shift;
    my $sig;
+
+   weaken $self;
 
    try   { $sig = Authen::HTTP::Signature::Parser->new($self)->parse() }
    catch { throw SigParserFailure, error => $_ };

@@ -1,5 +1,6 @@
 Revision history for Web::ComposableRequest::Role::Authen::HTTP
 
+          - Weaken request for Auth::Sig
           - Improved exception handling
           - Made _read_public key a method
           - Header wrapper method updated
